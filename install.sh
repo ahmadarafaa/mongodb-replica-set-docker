@@ -158,12 +158,12 @@ generate_keyfile() {
     # Generate new keyfile if openssl is available, otherwise use existing one
     if command -v openssl &> /dev/null; then
         show_progress 3 "🔑 Generating new secure keyfile with OpenSSL..."
-        openssl rand -base64 756 > config/keyfile/mongo-keyfile 2>/dev/null
-        chmod 600 config/keyfile/mongo-keyfile
+        openssl rand -base64 756 > config/keyfile/keyfile 2>/dev/null
+        chmod 600 config/keyfile/keyfile
         log_success "✅ New secure keyfile generated"
-    elif [[ -f "config/keyfile/mongo-keyfile" ]]; then
+    elif [[ -f "config/keyfile/keyfile" ]]; then
         log_info "⚠️ OpenSSL not available - using existing keyfile"
-        chmod 600 config/keyfile/mongo-keyfile
+        chmod 600 config/keyfile/keyfile
         log_success "✅ Existing keyfile configured"
     else
         log_error "No OpenSSL available and no existing keyfile found. Cannot proceed."
@@ -237,7 +237,7 @@ start_cluster() {
     docker compose down > /dev/null 2>&1
     
     # Update docker-compose to enable auth
-    sed -i 's/mongod --replSet rs0 --bind_ip_all$/mongod --replSet rs0 --bind_ip_all --auth --keyFile \/opt\/keyfile\/mongo-keyfile/' docker-compose.yml
+    sed -i 's/mongod --replSet rs0 --bind_ip_all$/mongod --replSet rs0 --bind_ip_all --auth --keyFile \/opt\/keyfile\/keyfile/' docker-compose.yml
     
     # Restart with authentication
     if ! docker compose up -d > /dev/null 2>&1; then

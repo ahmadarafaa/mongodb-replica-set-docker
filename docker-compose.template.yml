@@ -4,7 +4,7 @@ services:
     container_name: mongo1
     command: |
       bash -c '
-        chmod 600 /opt/keyfile/mongo-keyfile
+        chmod 600 /opt/keyfile/keyfile
         # Start without auth initially to allow replica set initialization
         mongod --replSet rs0 --bind_ip_all \
           --wiredTigerCacheSizeGB 0.25 \
@@ -33,7 +33,7 @@ services:
     container_name: mongo2
     command: |
       bash -c '
-        chmod 600 /opt/keyfile/mongo-keyfile
+        chmod 600 /opt/keyfile/keyfile
         mongod --replSet rs0 --bind_ip_all \
           --wiredTigerCacheSizeGB 0.25 \
           --wiredTigerCollectionBlockCompressor snappy \
@@ -63,7 +63,7 @@ services:
     container_name: mongo3
     command: |
       bash -c '
-        chmod 600 /opt/keyfile/mongo-keyfile
+        chmod 600 /opt/keyfile/keyfile
         mongod --replSet rs0 --bind_ip_all \
           --wiredTigerCacheSizeGB 0.25 \
           --wiredTigerCollectionBlockCompressor snappy \
