@@ -1,0 +1,38 @@
+# Docker related
+docker-compose.yml
+
+# Environment files with potentially sensitive data
+.env
+
+# Log files
+*.log
+/tmp/
+
+# MongoDB keyfile (generated at runtime)
+config/keyfile/mongo-keyfile
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Node modules (if any)
+node_modules/
+
+# Python cache (if any)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python

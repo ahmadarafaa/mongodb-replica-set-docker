@@ -1,0 +1,104 @@
+services:
+  mongo1:
+    image: mongo:${MONGO_VERSION:-6.0}
+    container_name: mongo1
+    command: |
+      bash -c '
+        chmod 600 /opt/keyfile/mongo-keyfile
+        # Start without auth initially to allow replica set initialization
+        mongod --replSet rs0 --bind_ip_all \
+          --wiredTigerCacheSizeGB 0.25 \
+          --wiredTigerCollectionBlockCompressor snappy \
+          --slowms 1000 \
+          --quiet
+      '
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo1_data:/data/db
+      - ./config/keyfile:/opt/keyfile
+    networks:
+      - mongo-cluster
+
+  mongo2:
+    image: mongo:${MONGO_VERSION:-6.0}
+    container_name: mongo2
+    command: |
+      bash -c '
+        chmod 600 /opt/keyfile/mongo-keyfile
+        mongod --replSet rs0 --bind_ip_all \
+          --wiredTigerCacheSizeGB 0.25 \
+          --wiredTigerCollectionBlockCompressor snappy \
+          --slowms 1000 \
+          --quiet
+      '
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo2_data:/data/db
+      - ./config/keyfile:/opt/keyfile
+    depends_on:
+      - mongo1
+    networks:
+      - mongo-cluster
+
+  mongo3:
+    image: mongo:${MONGO_VERSION:-6.0}
+    container_name: mongo3
+    command: |
+      bash -c '
+        chmod 600 /opt/keyfile/mongo-keyfile
+        mongod --replSet rs0 --bind_ip_all \
+          --wiredTigerCacheSizeGB 0.25 \
+          --wiredTigerCollectionBlockCompressor snappy \
+          --slowms 1000 \
+          --quiet
+      '
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo3_data:/data/db
+      - ./config/keyfile:/opt/keyfile
+    depends_on:
+      - mongo1
+    networks:
+      - mongo-cluster
+
+volumes:
+  mongo1_data:
+    external: true
+    name: mongo1_data
+  mongo2_data:
+    external: true
+    name: mongo2_data
+  mongo3_data:
+    external: true
+    name: mongo3_data
+
+networks:
+  mongo-cluster:
+    external: true
