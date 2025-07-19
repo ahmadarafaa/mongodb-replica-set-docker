@@ -8,9 +8,6 @@ docker-compose.yml
 *.log
 /tmp/
 
-# MongoDB keyfile (generated at runtime)
-config/keyfile/mongo-keyfile
-
 # OS generated files
 .DS_Store
 .DS_Store?
