@@ -1,16 +1,30 @@
-# MongoDB Replica Set Task
+# MongoDB Replica Set Docker
 
-A production-ready MongoDB 3-node replica set with authentication, containerized using Docker Compose. Optimized for development environments with resource constraints.
+🚀 Production-ready MongoDB replica set deployment with Docker. Automated installation, secure authentication, and health monitoring.
 
-## ✨ Features
+This setup provides a 3-node MongoDB replica set with best practices for production-like environments, including secure authentication, resource management, and comprehensive monitoring.
 
-- **3-node replica set** with automatic failover
-- **Authentication enabled** with dedicated users
-- **Configurable MongoDB versions** via environment variables
-- **Development-optimized** with resource limits and memory management
-- **Persistent data storage** with Docker volumes
-- **Network isolation** with custom Docker network
-- **Automated setup** with installation script
+## ✨ Production Features
+
+### 🏗️ Architecture
+- **3-node replica set** with automatic failover and election
+- **Secure keyfile authentication** for inter-node communication
+- **Role-based access control** with dedicated database users
+- **External volume management** with persistent data storage
+- **Network isolation** with dedicated Docker network
+
+### 🔒 Security
+- **TLS-ready configuration** (keyfile authentication enabled)
+- **Principle of least privilege** user access
+- **Secure password policies** and authentication
+- **Network segmentation** with custom Docker networks
+
+### 🚀 Operations
+- **One-command deployment** with automated setup
+- **Health monitoring** and cluster validation
+- **Resource optimization** with configurable limits
+- **Version flexibility** supporting MongoDB 5.x, 6.x, and 7.x
+- **Graceful startup/shutdown** with dependency management
 
 ## 📋 Prerequisites
 
@@ -21,21 +35,25 @@ A production-ready MongoDB 3-node replica set with authentication, containerized
 
 ## ⚙️ Configuration
 
-The MongoDB version and other settings are configurable via the `.env` file:
+The MongoDB version and other settings are configurable via environment variables:
 
 ```bash
-# MongoDB Configuration
-MONGO_VERSION=6.0
+# MongoDB Configuration (defaults to 6.0 if not specified)
+MONGO_VERSION=8.0  # Latest version
 
 # Optional: Add other configurable parameters
 MONGO_REPLICA_SET_NAME=rs0
 ```
 
-### Supported MongoDB Versions
-- **6.0** (default)
-- **5.x** 
-- **4.4** (may require compatibility adjustments)
-- **7.0** (latest)
+### Compatibility
+This script has been tested and works with the following MongoDB versions:
+- **8.0**: Latest stable release (October 2, 2024)
+- **7.0**: Stable version (August 15, 2023)
+- **6.0**: Long-term support (July 19, 2022)
+- **5.0**: Legacy version (July 13, 2021)
+
+### Important Note:
+While the script is compatible with these versions, some versions like 4.4 and 5.x have reached end-of-life and are not recommended for production use.
 
 To change the MongoDB version:
 1. Edit the `MONGO_VERSION` in `.env`
@@ -116,7 +134,7 @@ mongodb-task/
 │   ├── init/                  # Database initialization scripts
 │   │   └── setup-replica-set-working.sh
 │   └── keyfile/               # Replica set authentication keyfile
-│       └── mongo-keyfile
+│       └── keyfile
 ├── docs/
 │   └── mongodb-connection-commands.md  # Detailed connection reference
 └── scripts/
