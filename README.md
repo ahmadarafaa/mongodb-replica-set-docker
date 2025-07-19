@@ -21,9 +21,10 @@ This setup provides a 3-node MongoDB replica set with best practices for product
 
 ### 🚀 Operations
 - **One-command deployment** with automated setup
+- **Automatic database initialization** with users and sample data
 - **Health monitoring** and cluster validation
 - **Resource optimization** with configurable limits
-- **Version flexibility** supporting MongoDB 5.x, 6.x, and 7.x
+- **Version flexibility** supporting MongoDB 5.x, 6.x, 7.x, and 8.x
 - **Graceful startup/shutdown** with dependency management
 
 ## 📋 Prerequisites
@@ -93,7 +94,9 @@ The installation script provides a fully automated setup with progress indicator
 - ✨ Displays MongoDB version being used
 - 🧡 Automatic cleanup of existing containers
 - 🔐 Secure keyfile generation
+- 👥 Creates admin user and application databases
 - 📊 Progress indicators and health checks
+- 🗃️ Pre-seeds databases with sample test data
 - 📝 Clear connection information output
 
 ### Manual Installation
@@ -141,6 +144,29 @@ mongodb-task/
     ├── check-ips.sh           # Get container IP addresses
     └── test-cluster.sh        # Validate cluster health
 ```
+
+## 🗃️ Pre-configured Databases
+
+The installation script automatically creates two application databases with dedicated users and sample data for immediate testing:
+
+### 📊 Database: `db_one`
+- **User**: `user_one`
+- **Permissions**: Read/Write access to `db_one`
+- **Sample Collections**: 
+  - `products` - Electronic items with pricing and inventory
+  - `orders` - Customer orders with status tracking
+
+### 👥 Database: `db_two` 
+- **User**: `user_two`
+- **Permissions**: Read/Write access to `db_two`
+- **Sample Collections**:
+  - `employees` - Employee records with departments and salaries
+  - `projects` - Project management with budgets and status
+
+### 🔑 Admin Database: `admin`
+- **User**: `cluster_admin`
+- **Permissions**: Full administrative access (root role)
+- **Purpose**: Cluster management and administration
 
 ## 🔗 Connection Information
 
