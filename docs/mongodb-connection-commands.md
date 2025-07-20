@@ -52,11 +52,11 @@ mongodb://user_two:UserTwoSecurePass123%21@172.19.0.4:27017/db_two
 - **Host Resolution**: Container names (`mongo1`, `mongo2`, `mongo3`) require `/etc/hosts` entries
 - **Port Mapping**: Containers map to `localhost:27017`, `localhost:27018`, `localhost:27019`
 - **Authentication**: Each user is restricted to their designated database
-- **Network**: Containers communicate on the `mongodb-task_mongo-cluster` Docker network
+- **Network**: Containers communicate on the `mongo-cluster` Docker network
 
 ## Testing Connectivity
 
 ```bash
 # Test from Docker network (bypasses /etc/hosts requirement)
-docker run --rm --network mongodb-task_mongo-cluster -v $(pwd)/scripts:/scripts mongo:5.0 bash /scripts/test-cluster.sh
+docker run --rm --network mongo-cluster -v $(pwd)/scripts:/scripts mongo:5.0 bash /scripts/test-cluster.sh
 ```

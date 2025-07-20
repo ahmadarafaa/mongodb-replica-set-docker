@@ -127,7 +127,7 @@ The installation script provides a fully automated setup with progress indicator
 ## 🗂️ Project Structure
 
 ```
-mongodb-task/
+mongodb-replicaset-docker/
 ├── .env                       # Environment configuration (MongoDB version, etc.)
 ├── install.sh                 # Automated installation script
 ├── docker-compose.yml         # Docker Compose configuration
