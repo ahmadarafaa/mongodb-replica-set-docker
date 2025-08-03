@@ -237,7 +237,7 @@ start_cluster() {
     docker compose down > /dev/null 2>&1
     
     # Update docker-compose to enable auth
-    sed -i 's/mongod --replSet rs0 --bind_ip_all$/mongod --replSet rs0 --bind_ip_all --auth --keyFile \/opt\/keyfile\/keyfile/' docker-compose.yml
+    sed -i 's/--quiet$/--quiet --auth --keyFile \/opt\/keyfile\/keyfile/' docker-compose.yml
     
     # Restart with authentication
     if ! docker compose up -d > /dev/null 2>&1; then
