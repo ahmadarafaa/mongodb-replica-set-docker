@@ -11,68 +11,43 @@ fi
 # Set default MongoDB version if not specified
 MONGO_VERSION=${MONGO_VERSION:-6.0}
 
-# Color codes for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
 # Logging functions
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo "[INFO] $1"
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo "[SUCCESS] $1"
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    echo "[WARNING] $1"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo "[ERROR] $1"
 }
 
 # Progress indicator functions
 show_progress() {
     local duration=$1
     local message="$2"
-    local emojis=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
-    local emoji_count=${#emojis[@]}
     local end_time=$((SECONDS + duration))
     
-    # Hide cursor
-    printf "\033[?25l"
-    
+    printf "$message"
     while [ $SECONDS -lt $end_time ]; do
-        for ((i=0; i<emoji_count; i++)); do
-            printf "\r${BLUE}${emojis[i]}${NC} $message"
-            sleep 0.2
-            if [ $SECONDS -ge $end_time ]; then
-                break 2
-            fi
-        done
+        printf "."
+        sleep 1
     done
-    
-    # Show cursor and clear line
-    printf "\033[?25h"
-    printf "\r\033[K"
+    printf " done\n"
 }
 
 show_step_progress() {
     local step=$1
     local total=$2
     local message="$3"
-    local percentage=$((step * 100 / total))
-    local filled=$((percentage / 5))
-    local empty=$((20 - filled))
     
-    printf "\r🚀 ["
-    printf "%*s" $filled | tr ' ' '#'
-    printf "%*s" $empty | tr ' ' '-'
-    printf "] %d%% - %s" $percentage "$message"
+    printf "Step %d/%d: %s\n" $step $total "$message"
 }
 
 
@@ -115,18 +90,18 @@ check_prerequisites() {
 
 # Clean up existing containers and volumes
 cleanup_existing() {
-    log_info "🧹 Cleaning up existing MongoDB containers and volumes..."
+    log_info "Cleaning up existing MongoDB containers and volumes..."
     
     # Always start fresh from template to avoid authentication conflicts
     if [[ -f "docker-compose.template.yml" ]]; then
-        log_info "📋 Copying fresh docker-compose.yml from template..."
+        log_info "Copying fresh docker-compose.yml from template..."
         cp docker-compose.template.yml docker-compose.yml
     else
         log_warning "No template found, using existing docker-compose.yml"
     fi
     
     # Stop and remove existing containers
-    show_progress 5 "🛑 Stopping existing containers..."
+    show_progress 5 "Stopping existing containers..."
     docker compose down -v > /dev/null 2>&1 || true
     
     # Remove any existing containers with the same names
@@ -145,59 +120,59 @@ cleanup_existing() {
         fi
     done
     
-    log_success "✅ Cleanup completed"
+    log_success "Cleanup completed"
 }
 
 # Generate MongoDB keyfile for replica set authentication
 generate_keyfile() {
-    log_info "🔐 Setting up MongoDB keyfile for authentication..."
+    log_info "Setting up MongoDB keyfile for authentication..."
     
     # Create keyfile directory if it doesn't exist
     mkdir -p config/keyfile
     
     # Generate new keyfile if openssl is available, otherwise use existing one
     if command -v openssl &> /dev/null; then
-        show_progress 3 "🔑 Generating new secure keyfile with OpenSSL..."
+        show_progress 3 "Generating new secure keyfile with OpenSSL..."
         openssl rand -base64 756 > config/keyfile/keyfile 2>/dev/null
         chmod 600 config/keyfile/keyfile
-        log_success "✅ New secure keyfile generated"
+        log_success "New secure keyfile generated"
     elif [[ -f "config/keyfile/keyfile" ]]; then
-        log_info "⚠️ OpenSSL not available - using existing keyfile"
+        log_info "OpenSSL not available - using existing keyfile"
         chmod 600 config/keyfile/keyfile
-        log_success "✅ Existing keyfile configured"
+        log_success "Existing keyfile configured"
     else
         log_error "No OpenSSL available and no existing keyfile found. Cannot proceed."
         exit 1
     fi
     
-    log_success "🔐 Keyfile authentication setup completed"
+    log_success "Keyfile authentication setup completed"
 }
 
 # Create external volumes with static names
 create_external_volumes() {
-    log_info "📦 Creating external volumes with static names..."
+    log_info "Creating external volumes with static names..."
     
     volumes=("mongo1_data" "mongo2_data" "mongo3_data")
     for volume in "${volumes[@]}"; do
         if ! docker volume ls --format '{{.Name}}' | grep -q "^$volume$" 2>/dev/null; then
             docker volume create "$volume" > /dev/null 2>&1
-            log_success "✅ Created volume: $volume"
+            log_success "Created volume: $volume"
         else
-            log_info "📋 Volume already exists: $volume"
+            log_info "Volume already exists: $volume"
         fi
     done
     
-    log_success "📦 External volumes ready"
+    log_success "External volumes ready"
 }
 
 # Start the MongoDB cluster
 start_cluster() {
     echo ""
-    log_info "🚀 Starting MongoDB replica set cluster..."
+    log_info "Starting MongoDB replica set cluster..."
     
     # Create the network if it doesn't exist
     if ! docker network ls --format '{{.Name}}' | grep -q '^mongo-cluster$'; then
-        log_info "🌐 Creating mongo-cluster network..."
+        log_info "Creating mongo-cluster network..."
         docker network create mongo-cluster > /dev/null 2>&1
     fi
     
@@ -209,13 +184,13 @@ start_cluster() {
         return 1
     fi
     printf "\n"
-    log_success "✅ Containers started successfully"
+    log_success "Containers started successfully"
     
     # Step 2: Wait for containers to initialize
     show_step_progress 2 5 "Waiting for MongoDB instances to initialize..."
     printf "\n"
-    show_progress 30 "⏳ Initializing MongoDB instances (30s)..."
-    log_success "✅ MongoDB instances are ready"
+    show_progress 30 "Initializing MongoDB instances..."
+    log_success "MongoDB instances are ready"
     
     # Step 3: Initialize replica set and create users
     show_step_progress 3 5 "Setting up replica set and users..."
@@ -223,7 +198,7 @@ start_cluster() {
     # Use the dedicated setup script that handles localhost exception properly
     if docker run --rm --network mongo-cluster -v $(pwd)/config/init:/scripts mongo:${MONGO_VERSION} bash /scripts/setup-replica-set-working.sh > /tmp/setup.log 2>&1; then
         printf "\n"
-        log_success "✅ Replica set and users configured successfully"
+        log_success "Replica set and users configured successfully"
     else
         printf "\n"
         log_error "Replica set setup failed. Check /tmp/setup.log for details"
@@ -246,34 +221,34 @@ start_cluster() {
         return 1
     fi
     printf "\n"
-    log_success "🔐 Authentication enabled successfully"
+    log_success "Authentication enabled successfully"
     
     # Step 5: Final verification
     show_step_progress 5 5 "Running final health check..."
     printf "\n"
-    show_progress 10 "🔍 Verifying cluster health..."
+    show_progress 10 "Verifying cluster health..."
     
     if docker run --rm --network mongo-cluster -v $(pwd)/scripts:/scripts mongo:${MONGO_VERSION} bash /scripts/test-cluster.sh > /dev/null 2>&1; then
         printf "\n"
-        log_success "✅ Authenticated cluster is healthy and ready"
+        log_success "Authenticated cluster is healthy and ready"
     else
         printf "\n"
-        log_warning "⚠️  Cluster health check had issues, but cluster should be functional"
+        log_warning "Cluster health check had issues, but cluster should be functional"
     fi
     printf "\n"
 }
 
 # Configure network (update /etc/hosts)
 configure_network() {
-    log_info "🌐 Configuring network settings..."
+    log_info "Configuring network settings..."
     
     # Get container IPs
-    show_progress 2 "🔍 Getting container IP addresses..."
+    show_progress 2 "Getting container IP addresses..."
     ./scripts/check-ips.sh 2>/dev/null
     
     echo ""
-    log_warning "⚠️ IMPORTANT: Update your /etc/hosts file manually!"
-    log_warning "📋 Copy the IP mappings shown above and add them to /etc/hosts"
+    log_warning "IMPORTANT: Update your /etc/hosts file manually!"
+    log_warning "Copy the IP mappings shown above and add them to /etc/hosts"
     echo ""
 }
 
@@ -281,9 +256,9 @@ configure_network() {
 display_connection_info() {
     log_info "MongoDB Replica Set Installation Complete!"
     echo ""
-    log_success "🎉 Your MongoDB replica set is now running!"
+    log_success "Your MongoDB replica set is now running!"
     echo ""
-    echo "📋 Connection Information:"
+    echo "Connection Information:"
     echo "========================="
     echo ""
     echo "Admin User:"
@@ -296,15 +271,15 @@ display_connection_info() {
     echo "  # User Two (db_two)"
     echo "  mongodb://user_two:UserTwoSecurePass123%21@mongo1:27017,mongo2:27017,mongo3:27017/db_two?replicaSet=rs0&authSource=db_two"
     echo ""
-    echo "📁 Documentation: docs/"
-    echo "🔧 Scripts: scripts/"
-    echo "⚙️  Configuration: config/"
+    echo "Documentation: docs/"
+    echo "Scripts: scripts/"
+    echo "Configuration: config/"
     echo ""
-    echo "🛠️  Useful Commands:"
-    echo "  • Check container IPs: ./scripts/check-ips.sh"
-  echo "  • Test cluster: docker run --rm --network mongo-cluster -v \$(pwd)/scripts:/scripts mongo:${MONGO_VERSION} bash /scripts/test-cluster.sh"
-    echo "  • Stop cluster: docker compose down"
-    echo "  • View logs: docker compose logs"
+    echo "Useful Commands:"
+    echo "  * Check container IPs: ./scripts/check-ips.sh"
+    echo "  * Test cluster: docker run --rm --network mongo-cluster -v \$(pwd)/scripts:/scripts mongo:${MONGO_VERSION} bash /scripts/test-cluster.sh"
+    echo "  * Stop cluster: docker compose down"
+    echo "  * View logs: docker compose logs"
     echo ""
     log_warning "Remember: After restarting containers, you may need to update /etc/hosts again!"
 }
@@ -312,9 +287,9 @@ display_connection_info() {
 # Main installation function
 main() {
     echo "================================================"
-    echo "🚀 MongoDB Replica Set Installation Script"
+    echo "MongoDB Replica Set Installation Script"
     echo "================================================"
-    echo "📦 Using MongoDB Version: ${MONGO_VERSION}"
+    echo "Using MongoDB Version: ${MONGO_VERSION}"
     echo ""
     
     check_prerequisites
